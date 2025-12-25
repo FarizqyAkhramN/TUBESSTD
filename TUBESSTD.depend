@@ -1,0 +1,24 @@
+# depslib dependency file v1.0
+1765267581 source:d:\journey\kuliah\all semester\semester 3\strukture data\tube\tubesstd\tree.cpp
+	"tree.h"
+	<iostream>
+
+1765377755 d:\journey\kuliah\all semester\semester 3\strukture data\tube\tubesstd\tree.h
+	<string>
+	<iostream>
+
+1765783376 source:d:\journey\kuliah\all semester\semester 3\strukture data\tube\tubesstd\main.cpp
+	"MLL.H"
+	<iostream>
+	<limits>
+	<string>
+
+1765783107 source:d:\journey\kuliah\all semester\semester 3\strukture data\tube\tubesstd\mll.cpp
+	"MLL.H"
+	<iostream>
+	<string>
+
+1765783101 d:\journey\kuliah\all semester\semester 3\strukture data\tube\tubesstd\mll.h
+	<iostream>
+	<string>
+
