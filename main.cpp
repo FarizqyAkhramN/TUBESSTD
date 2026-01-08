@@ -42,7 +42,6 @@ int main() {
         cleanInputBuffer();
 
         cout << endl;
-
         switch (choice) {
             case 1:
                 cout << "Masukkan Nama Provinsi Baru: ";

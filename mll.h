@@ -40,7 +40,6 @@ adrProvinsi searchProvinsi(AdministrativeStructure S, string nama);
 adrKabupaten searchKabupaten(AdministrativeStructure S, string namaProvinsi, string namaKabupaten);
 bool deleteProvinsi(AdministrativeStructure &S, string namaProvinsi);
 bool deleteKabupaten(AdministrativeStructure &S, string namaProvinsi, string namaKabupaten);
-
 void displayList(AdministrativeStructure S);
 
 
