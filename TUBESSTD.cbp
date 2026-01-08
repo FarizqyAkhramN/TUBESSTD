@@ -35,8 +35,6 @@
 		<Unit filename="main.cpp" />
 		<Unit filename="mll.cpp" />
 		<Unit filename="mll.h" />
-		<Unit filename="tree.cpp" />
-		<Unit filename="tree.h" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

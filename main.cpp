@@ -6,12 +6,12 @@
 using namespace std;
 
 void cleanInputBuffer() {
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.ignore();
 }
 
 void displayMenu() {
     cout << "\n=========================================" << endl;
-    cout << "  SISTEM MLL ADMINISTRASI: INDONESIA" << endl;
+    cout << "   SISTEM MLL ADMINISTRASI: INDONESIA" << endl;
     cout << "=========================================" << endl;
     cout << "1. Tambah Provinsi" << endl;
     cout << "2. Tambah Kabupaten/Kota" << endl;
@@ -30,6 +30,7 @@ int main() {
     AdministrativeStructure S;
     int choice;
     string namaProvinsi, namaKabupaten, namaTarget;
+
     createStructure(S, "Indonesia");
     cout << "Root Administrasi Dibuat: " << S.nama << " (" << S.tipe << ")" << endl;
 
@@ -44,15 +45,12 @@ int main() {
         }
         cleanInputBuffer();
 
-        cout << endl;
-
         switch (choice) {
             case 1:
                 cout << "Masukkan Nama Provinsi Baru: ";
                 getline(cin, namaProvinsi);
                 addProvinsi(S, namaProvinsi);
                 break;
-
             case 2:
                 cout << "Masukkan Nama Provinsi Induk: ";
                 getline(cin, namaProvinsi);
@@ -60,41 +58,36 @@ int main() {
                 getline(cin, namaKabupaten);
                 addKabupaten(S, namaProvinsi, namaKabupaten);
                 break;
-
             case 3: {
-                cout << "Masukkan Nama yang dicari (Provinsi/Kabupaten): ";
+                cout << "Masukkan Nama yang dicari: ";
                 getline(cin, namaTarget);
-
-                adrProvinsi foundProv = searchProvinsi(S, namaTarget);
-
-                if (foundProv) {
-                    cout << "DITEMUKAN: Provinsi '" << foundProv->info.nama << "'." << endl;
-                    break;
-                }
-
-                adrProvinsi P = S.firstProvinsi;
-                bool found = false;
-
-                while (P != nullptr) {
-                    adrKabupaten foundKab = searchKabupaten(S, P->info.nama, namaTarget);
-                    if (foundKab) {
-                        cout << "DITEMUKAN: Kabupaten/Kota '" << foundKab->info.nama << "' di Provinsi " << P->info.nama << "." << endl;
-                        found = true;
-                        break;
+                adrProvinsi fP = searchProvinsiRekursif(S.left, namaTarget);
+                if (fP) {
+                    cout << "\nHasil Pencarian:\n" << S.nama << " (Root) > " << fP->info.nama << " (Provinsi)" << endl;
+                } else {
+                    bool found = false;
+                    adrProvinsi currP = S.left;
+                    while (currP != nullptr) {
+                        adrKabupaten fQ = searchKabupatenRekursif(currP->left, namaTarget);
+                        if (fQ) {
+                            cout << "\nHasil Pencarian:\n" << S.nama << " (Root) > " << currP->info.nama << " (Provinsi) > " << fQ->info.nama << " (Kabupaten)" << endl;
+                            found = true;
+                            break;
+                        }
+                        currP = currP->right;
                     }
-                    P = P->next;
-                }
-
-                if (!found) {
-                    cout << "TIDAK DITEMUKAN: Elemen '" << namaTarget << "' tidak ada." << endl;
+                    if (!found) cout << "Data '" << namaTarget << "' tidak ditemukan." << endl;
                 }
                 break;
             }
-
             case 4:
                 cout << "Masukkan Nama Provinsi yang akan dihapus: ";
                 getline(cin, namaProvinsi);
-                deleteProvinsi(S, namaProvinsi);
+                if (deleteProvinsi(S, namaProvinsi)) {
+                    cout << "Provinsi '" << namaProvinsi << "' berhasil dihapus." << endl;
+                } else {
+                    cout << "Gagal: Provinsi tidak ditemukan." << endl;
+                }
                 break;
 
             case 5:
@@ -102,46 +95,29 @@ int main() {
                 getline(cin, namaProvinsi);
                 cout << "Masukkan Nama Kabupaten/Kota yang akan dihapus: ";
                 getline(cin, namaKabupaten);
-                deleteKabupaten(S, namaProvinsi, namaKabupaten);
+                if (deleteKabupaten(S, namaProvinsi, namaKabupaten)) {
+                    cout << "Kabupaten '" << namaKabupaten << "' berhasil dihapus." << endl;
+                } else {
+                    cout << "Gagal: Data tidak ditemukan." << endl;
+                }
                 break;
-
-            case 6:
-                displayList(S);
-                break;
-
+            case 6: displayList(S); break;
             case 7:
-                cout << "\n=========================================" << endl;
-                cout << "HASIL TRAVERSAL PRE-ORDER" << endl;
-                cout << "=========================================" << endl;
-                cout << "Urutan: ";
-                preOrderTraversal(S);
+                cout << "\nPre-Order: " << S.nama << " (Negara) -> ";
+                preOrderRekursif(S.left);
+                cout << "END" << endl;
                 break;
-
             case 8:
-                cout << "\n=========================================" << endl;
-                cout << "HASIL TRAVERSAL IN-ORDER" << endl;
-                cout << "=========================================" << endl;
-                cout << "Urutan: ";
-                inOrderTraversal(S);
+                cout << "\nIn-Order: ";
+                inOrderRekursif(S.left);
+                cout << S.nama << " (Negara) -> END" << endl;
                 break;
-
             case 9:
-                cout << "\n=========================================" << endl;
-                cout << "HASIL TRAVERSAL POST-ORDER" << endl;
-                cout << "=========================================" << endl;
-                cout << "Urutan: ";
-                postOrderTraversal(S);
-                break;
-
-            case 10:
-                cout << "Program selesai." << endl;
-                break;
-
-            default:
-                cout << "\nPilihan tidak valid. Silakan coba lagi." << endl;
+                cout << "\nPost-Order: ";
+                postOrderRekursif(S.left);
+                cout << S.nama << " (Negara) -> END" << endl;
                 break;
         }
-
     } while (choice != 10);
 
     return 0;
