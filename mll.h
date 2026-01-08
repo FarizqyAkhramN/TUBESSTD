@@ -16,35 +16,32 @@ typedef struct {
 
 typedef struct elemenKabupaten {
     Info info;
-    adrKabupaten right;
-    adrKabupaten left;
+    adrKabupaten next;
+    adrKabupaten prev;
 } ElementKabupaten;
 
 typedef struct elemenProvinsi {
     Info info;
-    adrProvinsi right;
-    adrKabupaten left;
+    adrProvinsi next;
+    adrProvinsi prev;
+    adrKabupaten firstKabupaten;
 } ElementProvinsi;
 
 typedef struct {
     string nama;
     string tipe;
-    adrProvinsi left;
+    adrProvinsi firstProvinsi;
 } AdministrativeStructure;
 
-void createStructure(AdministrativeStructure &S, string namaNegara);
-bool addProvinsi(AdministrativeStructure &S, string namaProvinsi);
-bool addKabupaten(AdministrativeStructure &S, string namaProvinsi, string namaKabupaten);
+void createStructure(AdministrativeStructure &S, const string& namaNegara);
+bool addProvinsi(AdministrativeStructure &S, const string& namaProvinsi);
+bool addKabupaten(AdministrativeStructure &S, const string& namaProvinsi, const string& namaKabupaten);
+adrProvinsi searchProvinsi(AdministrativeStructure S, string nama);
+adrKabupaten searchKabupaten(AdministrativeStructure S, string namaProvinsi, string namaKabupaten);
 bool deleteProvinsi(AdministrativeStructure &S, string namaProvinsi);
 bool deleteKabupaten(AdministrativeStructure &S, string namaProvinsi, string namaKabupaten);
 
-adrProvinsi searchProvinsiRekursif(adrProvinsi P, string nama);
-adrKabupaten searchKabupatenRekursif(adrKabupaten Q, string nama);
-
-void preOrderRekursif(adrProvinsi P);
-void inOrderRekursif(adrProvinsi P);
-void postOrderRekursif(adrProvinsi P);
-
 void displayList(AdministrativeStructure S);
+
 
 #endif

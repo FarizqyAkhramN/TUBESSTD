@@ -1,152 +1,138 @@
 #include "MLL.H"
 
-void createStructure(AdministrativeStructure &S, string namaNegara) {
+adrProvinsi createElementProvinsi(string nama) {
+    adrProvinsi P = new ElementProvinsi;
+    P->info.nama = nama;
+    P->info.tipe = "Provinsi";
+    P->next = nullptr;
+    P->prev = nullptr;
+    P->firstKabupaten = nullptr;
+    return P;
+}
+
+adrKabupaten createElementKabupaten(string nama) {
+    adrKabupaten Q = new ElementKabupaten;
+    Q->info.nama = nama;
+    Q->info.tipe = "Kabupaten/Kota";
+    Q->next = nullptr;
+    Q->prev = nullptr;
+    return Q;
+}
+
+void createStructure(AdministrativeStructure &S, const string& namaNegara) {
     S.nama = namaNegara;
     S.tipe = "Negara";
-    S.left = nullptr;
+    S.firstProvinsi = nullptr;
 }
 
-adrProvinsi searchProvinsiRekursif(adrProvinsi P, string nama) {
-    if (P == nullptr) return nullptr;
-    if (P->info.nama == nama) return P;
-    return searchProvinsiRekursif(P->right, nama);
-}
-
-adrKabupaten searchKabupatenRekursif(adrKabupaten Q, string nama) {
-    if (Q == nullptr) return nullptr;
-    if (Q->info.nama == nama) return Q;
-    return searchKabupatenRekursif(Q->right, nama);
-}
-
-bool addProvinsi(AdministrativeStructure &S, string namaProvinsi) {
-    adrProvinsi P = new ElementProvinsi;
-    P->info.nama = namaProvinsi;
-    P->info.tipe = "Provinsi";
-    P->left = nullptr;
-    P->right = nullptr;
-
-    if (S.left == nullptr) {
-        S.left = P;
-    } else {
-        adrProvinsi last = S.left;
-        while (last->right != nullptr) last = last->right;
-        last->right = P;
+adrProvinsi searchProvinsi(AdministrativeStructure S, string nama) {
+    adrProvinsi P = S.firstProvinsi;
+    while (P != nullptr) {
+        if (P->info.nama == nama) return P;
+        P = P->next;
     }
-    cout << "Provinsi '" << namaProvinsi << "' berhasil ditambahkan di bawah " << S.nama << "." << endl;
+    return nullptr;
+}
+
+adrKabupaten searchKabupaten(AdministrativeStructure S, string namaProvinsi, string namaKabupaten) {
+    adrProvinsi P = searchProvinsi(S, namaProvinsi);
+    if (P == nullptr) return nullptr;
+    adrKabupaten Q = P->firstKabupaten;
+    while (Q != nullptr) {
+        if (Q->info.nama == namaKabupaten) return Q;
+        Q = Q->next;
+    }
+    return nullptr;
+}
+
+bool addProvinsi(AdministrativeStructure &S, const string& namaProvinsi) {
+    adrProvinsi P = createElementProvinsi(namaProvinsi);
+    if (S.firstProvinsi == nullptr) {
+        S.firstProvinsi = P;
+    } else {
+        adrProvinsi current = S.firstProvinsi;
+        while (current->next != nullptr) current = current->next;
+        current->next = P;
+        P->prev = current;
+    }
+    cout << P->info.tipe << " '" << P->info.nama << "' berhasil ditambahkan di bawah " << S.nama << "." << endl;
     return true;
 }
 
-bool addKabupaten(AdministrativeStructure &S, string namaProvinsi, string namaKabupaten) {
-    adrProvinsi P = searchProvinsiRekursif(S.left, namaProvinsi);
+bool addKabupaten(AdministrativeStructure &S, const string& namaProvinsi, const string& namaKabupaten) {
+    adrProvinsi P = searchProvinsi(S, namaProvinsi);
     if (P == nullptr) return false;
-
-    adrKabupaten Q = new ElementKabupaten;
-    Q->info.nama = namaKabupaten;
-    Q->info.tipe = "Kabupaten/Kota";
-    Q->right = nullptr;
-    Q->left = nullptr;
-
-    if (P->left == nullptr) {
-        P->left = Q;
+    adrKabupaten Q = createElementKabupaten(namaKabupaten);
+    if (P->firstKabupaten == nullptr) {
+        P->firstKabupaten = Q;
     } else {
-        adrKabupaten last = P->left;
-        while (last->right != nullptr) last = last->right;
-        last->right = Q;
+        adrKabupaten current = P->firstKabupaten;
+        while (current->next != nullptr) current = current->next;
+        current->next = Q;
+        Q->prev = current;
     }
-    cout << "Kabupaten '" << namaKabupaten << "' berhasil ditambahkan di bawah " << namaProvinsi << "." << endl;
+    cout << Q->info.tipe << " '" << Q->info.nama << "' berhasil ditambahkan di bawah " << P->info.nama << "." << endl;
     return true;
 }
 
 bool deleteProvinsi(AdministrativeStructure &S, string namaProvinsi) {
-    adrProvinsi P = searchProvinsiRekursif(S.left, namaProvinsi);
+    adrProvinsi P = searchProvinsi(S, namaProvinsi);
     if (P == nullptr) return false;
-
-    if (S.left == P) {
-        S.left = P->right;
+    adrKabupaten currentKab = P->firstKabupaten;
+    while (currentKab != nullptr) {
+        adrKabupaten temp = currentKab;
+        currentKab = currentKab->next;
+        delete temp;
+    }
+    if (P == S.firstProvinsi) {
+        S.firstProvinsi = P->next;
+        if (S.firstProvinsi != nullptr) S.firstProvinsi->prev = nullptr;
     } else {
-        adrProvinsi prev = S.left;
-        while (prev->right != P) prev = prev->right;
-        prev->right = P->right;
+        P->prev->next = P->next;
+        if (P->next != nullptr) P->next->prev = P->prev;
     }
     delete P;
     return true;
 }
 
 bool deleteKabupaten(AdministrativeStructure &S, string namaProvinsi, string namaKabupaten) {
-    adrProvinsi P = searchProvinsiRekursif(S.left, namaProvinsi);
-    if (P == nullptr || P->left == nullptr) return false;
-
-    adrKabupaten Q = searchKabupatenRekursif(P->left, namaKabupaten);
-    if (Q == nullptr) return false;
-
-    if (P->left == Q) {
-        P->left = Q->right;
+    adrProvinsi P = searchProvinsi(S, namaProvinsi);
+    if (P == nullptr) return false;
+    adrKabupaten target = searchKabupaten(S, namaProvinsi, namaKabupaten);
+    if (target == nullptr) return false;
+    if (target == P->firstKabupaten) {
+        P->firstKabupaten = target->next;
+        if (P->firstKabupaten != nullptr) P->firstKabupaten->prev = nullptr;
     } else {
-        adrKabupaten prev = P->left;
-        while (prev->right != Q) prev = prev->right;
-        prev->right = Q->right;
+        target->prev->next = target->next;
+        if (target->next != nullptr) target->next->prev = target->prev;
     }
-    delete Q;
+    delete target;
     return true;
 }
 
-void printKabupatenRekursif(adrKabupaten Q) {
-    if (Q == nullptr) return;
-    cout << "  |   |-- Kabupaten: " << Q->info.nama << endl;
-    printKabupatenRekursif(Q->right);
-}
-
 void displayList(AdministrativeStructure S) {
-    cout << "\n=== STRUKTUR HIERARKI ADMINISTRASI ===" << endl;
-    cout << S.nama << " (Root Negara)" << endl;
+    adrProvinsi P = S.firstProvinsi;
+    cout << "\n--- STRUKTUR WILAYAH ---" << endl;
+    cout << "NEGARA: " << S.nama << endl;
 
-    adrProvinsi P = S.left;
     if (P == nullptr) {
-        cout << "  [Belum ada data provinsi]" << endl;
+        cout << "  -> (Belum ada data provinsi)" << endl;
         return;
     }
-
     while (P != nullptr) {
-        cout << "  |-- Provinsi: " << P->info.nama << endl;
-        if (P->left == nullptr) {
-            cout << "  |   |-- (Belum ada kabupaten)" << endl;
+        cout << "  |-- PROVINSI: " << P->info.nama << endl;
+
+        adrKabupaten Q = P->firstKabupaten;
+        if (Q == nullptr) {
+            cout << "  |   |-- (Belum ada kabupaten/kota)" << endl;
         } else {
-            printKabupatenRekursif(P->left);
+            while (Q != nullptr) {
+                cout << "  |   |-- KABUPATEN/KOTA: " << Q->info.nama << endl;
+                Q = Q->next;
+            }
         }
-        P = P->right;
+        P = P->next;
     }
-    cout << "=======================================" << endl;
 }
 
-void preOrderRekursif(adrProvinsi P) {
-    if (P == nullptr) return;
-    cout << P->info.nama << " (Provinsi) -> ";
-    adrKabupaten Q = P->left;
-    while (Q != nullptr) {
-        cout << Q->info.nama << " (Kab/Kota) -> ";
-        Q = Q->right;
-    }
-    preOrderRekursif(P->right);
-}
-
-void inOrderRekursif(adrProvinsi P) {
-    if (P == nullptr) return;
-    adrKabupaten Q = P->left;
-    while (Q != nullptr) {
-        cout << Q->info.nama << " (Kab/Kota) -> ";
-        Q = Q->right;
-    }
-    cout << P->info.nama << " (Provinsi) -> ";
-    inOrderRekursif(P->right);
-}
-
-void postOrderRekursif(adrProvinsi P) {
-    if (P == nullptr) return;
-    postOrderRekursif(P->right);
-    adrKabupaten Q = P->left;
-    while (Q != nullptr) {
-        cout << Q->info.nama << " (Kab/Kota) -> ";
-        Q = Q->right;
-    }
-    cout << P->info.nama << " (Provinsi) -> ";
-}
